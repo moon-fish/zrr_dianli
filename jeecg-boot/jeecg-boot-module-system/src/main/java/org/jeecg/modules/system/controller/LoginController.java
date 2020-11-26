@@ -50,6 +50,8 @@ public class LoginController {
     private RedisUtil redisUtil;
 	@Autowired
     private ISysDepartService sysDepartService;
+	@Autowired
+	private SysUserController sysUserController;
 	
 	private static final String BASE_CHECK_CODES = "qwertyuiplkjhgfdsazxcvbnmQWERTYUPLKJHGFDSAZXCVBNM1234567890";
 

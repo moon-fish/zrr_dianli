@@ -105,6 +105,7 @@ public class ElectricityFilerB implements Serializable {
     private java.lang.String filerResult;
 	/**申报状态*/
 	@Excel(name = "申报状态", width = 15)
+//    @Dict(dictTable = "elecFilterStatus", dicText = "1", dicCode = "")
     @ApiModelProperty(value = "申报状态")
     private java.lang.String filerStatus;
 	/**日志记录*/

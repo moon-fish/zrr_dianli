@@ -10,12 +10,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.common.system.query.QueryGenerator;
@@ -24,11 +26,9 @@ import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.util.PasswordUtil;
 import org.jeecg.common.util.RedisUtil;
 import org.jeecg.common.util.oConvertUtils;
+import org.jeecg.modules.dw.entity.Account;
 import org.jeecg.modules.dw.entity.MomthElec;
-import org.jeecg.modules.system.entity.SysDepart;
-import org.jeecg.modules.system.entity.SysUser;
-import org.jeecg.modules.system.entity.SysUserDepart;
-import org.jeecg.modules.system.entity.SysUserRole;
+import org.jeecg.modules.system.entity.*;
 import org.jeecg.modules.system.model.DepartIdModel;
 import org.jeecg.modules.system.model.SysUserSysDepartModel;
 import org.jeecg.modules.system.service.ISysDepartService;
@@ -114,12 +114,16 @@ public class SysUserController {
 
 	//查询所有数据 调整记录修改时，修改次数
 	@RequestMapping(value = "/queryall", method = RequestMethod.GET)
-	public Result<List<SysUser>> queryall(String userName) {
+	public Result<List<SysUser>> queryall(String userName,String zh) {
 		Result<List<SysUser>> result = new Result<>();
 		QueryWrapper<SysUser> queryWrapper = new QueryWrapper<SysUser>();
 		if(!oConvertUtils.isEmpty(userName)) {
 			queryWrapper.eq("realname", userName);
 		}
+		//微信小程序 根据输入的账号判断该账号是否同意条款
+        if(!oConvertUtils.isEmpty(zh)) {
+            queryWrapper.eq("username", zh);
+        }
 		List<SysUser> list = sysUserService.list(queryWrapper);
 		if(list==null||list.size()<=0) {
 			result.error500("未找到角色信息");
@@ -181,6 +185,26 @@ public class SysUserController {
 		}
 		return result;
 	}
+
+    /**
+     *  编辑
+     *
+     * @param username
+     * @return
+     */
+    @AutoLog(value = "户号信息-编辑")
+    @ApiOperation(value="户号信息-编辑", notes="户号信息-编辑")
+    @PutMapping(value = "/saveOrUpdate")
+    public Result<?> saveOrUpdate(String username) {
+        //微信小程序,用户登录成功后,将is_agree改为1
+        Result<List<SysUser>> userList = this.queryall("",username);
+        if(userList.isSuccess()){
+            SysUser sysuser = userList.getResult().get(0);
+            sysuser.setIsAgree("1");
+            sysUserService.saveOrUpdate(sysuser);
+        }
+        return Result.ok("编辑成功!");
+    }
 
 	/**
 	 * 删除用户

@@ -143,11 +143,9 @@ public class SysAnnouncementController {
 	public Result<SysAnnouncement> add(@RequestBody SysAnnouncement sysAnnouncement) {
 		Result<SysAnnouncement> result = new Result<SysAnnouncement>();
 		try {
-			System.out.println("add sys_announcement");
 			sysAnnouncement.setDelFlag(CommonConstant.DEL_FLAG_0.toString());
 			sysAnnouncement.setSendStatus(CommonSendStatus.UNPUBLISHED_STATUS_0);//未发布
 			sysAnnouncementService.saveAnnouncement(sysAnnouncement);
-			System.out.println("sadasd");
 			result.success("添加成功！");
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
@@ -246,7 +244,7 @@ public class SysAnnouncementController {
 	 * @return
 	 */
 	@RequestMapping(value = "/doReleaseData", method = RequestMethod.GET)
-	public Result<SysAnnouncement> doReleaseData(@RequestParam(name="id",required=true) String id, HttpServletRequest request) {
+	public Result<SysAnnouncement> doReleaseData(@RequestParam(name="id",required=true) String id) {
 		Result<SysAnnouncement> result = new Result<SysAnnouncement>();
 		SysAnnouncement sysAnnouncement = sysAnnouncementService.getById(id);
 		if(sysAnnouncement==null) {
@@ -254,8 +252,8 @@ public class SysAnnouncementController {
 		}else {
 			sysAnnouncement.setSendStatus(CommonSendStatus.PUBLISHED_STATUS_1);//发布中
 			sysAnnouncement.setSendTime(new Date());
-			String currentUserName = JwtUtil.getUserNameByToken(request);
-			sysAnnouncement.setSender(currentUserName);
+//			String currentUserName = JwtUtil.getUserNameByToken(request);
+			sysAnnouncement.setSender("rrr");
 			boolean ok = sysAnnouncementService.updateById(sysAnnouncement);
 			if(ok) {
 				result.success("该系统通知发布成功");
@@ -308,7 +306,7 @@ public class SysAnnouncementController {
 
 	/**
 	 * @功能：补充用户数据，并返回系统消息
-	 * @param id
+	 * @param
 	 * @return
 	 */
 	@RequestMapping(value = "/listByUser", method = RequestMethod.GET)
@@ -322,7 +320,7 @@ public class SysAnnouncementController {
 		querySaWrapper.eq(SysAnnouncement::getMsgType,CommonConstant.MSG_TYPE_ALL); // 全部人员
 		querySaWrapper.eq(SysAnnouncement::getDelFlag,CommonConstant.DEL_FLAG_0.toString());  // 未删除
 		querySaWrapper.eq(SysAnnouncement::getSendStatus, CommonConstant.HAS_SEND); //已发布
-		querySaWrapper.ge(SysAnnouncement::getEndTime, sysUser.getCreateTime()); //新注册用户不看结束通知
+//		querySaWrapper.ge(SysAnnouncement::getEndTime, sysUser.getCreateTime()); //新注册用户不看结束通知
 		if(anntIds!=null&&anntIds.size()>0) {
 			querySaWrapper.notIn(SysAnnouncement::getId, anntIds);
 		}

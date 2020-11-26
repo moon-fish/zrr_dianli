@@ -1,10 +1,7 @@
 package org.jeecg.modules.dw.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -84,38 +81,52 @@ public class ElectricityFilerBController extends JeecgController<ElectricityFile
 	 */
 	@AutoLog(value = "电量申报-分页列表查询")
 	@ApiOperation(value="电量申报-分页列表查询", notes="电量申报-分页列表查询")
-	@GetMapping(value = "/list")
-	public Result<?> queryPageList(ElectricityFilerB electricityFilerB,
+	@GetMapping(value = "/list/{num}")
+	public Result<?> queryPageList(ElectricityFilerB electricityFilerB,@PathVariable int num,
 								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
 								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
 								   HttpServletRequest req) {
 		QueryWrapper<ElectricityFilerB> queryWrapper = QueryGenerator.initQueryWrapper(electricityFilerB, req.getParameterMap());
+
 		queryWrapper.orderByDesc("create_time");
-		//权限设置 
-		//根据登录人的信息查出区域内的公司名称，再根据公司名称过滤数据
-		//获取登录人信息
-//		LoginUser sysUser = (LoginUser)SecurityUtils.getSubject().getPrincipal();
-//		//登录人id
-//		String id = sysUser.getId();
-//		//登录人角色id
-//		String roleId = sysUserRoleService.queryByUserId(id);
-//		//登录人   角色信息
-//		SysRole sysrole = sysRoleService.getById(roleId);
-//		//登录人 角色code
-//		String roleCode = sysrole.getRoleCode();
-//		QueryWrapper<UserInfoB> queryWrapperUserInfo = new QueryWrapper<UserInfoB>();
-//		//晋城、长治、阳泉区域   根据角色编码设置其区域 ---写死的，可能得改
-//		if(roleCode.equals("areaManagerMin")) {
-//			queryWrapperUserInfo.like("address_info", "晋城").or().like("address_info","长治").or().like("address_info","阳泉");
-//		}else if(roleCode.equals("areaManageMi")){
-//			//运城、忻州、吕梁、晋中
-//			queryWrapperUserInfo.like("address_info", "运城").or().like("address_info","忻州").or().like("address_info","吕梁").or().like("address_info","晋中");
+
+//		if(oConvertUtils.isNotEmpty(electricityFilerB.getBeginDate())){
+//			queryWrapper.ge("create_time",electricityFilerB.getBeginDate());
 //		}
-//		List<UserInfoB> list = userInfoBService.list(queryWrapperUserInfo);
-//		List<String> companys = new ArrayList<String>();
-//		for(UserInfoB userInfoB : list) {
-//			companys.add(userInfoB.getComAName());
+//		if(oConvertUtils.isNotEmpty(electricityFilerB.getEndDate())){
+//			queryWrapper.le("create_time",electricityFilerB.getEndDate());
 //		}
+		//num为1时，显示的是通知信息
+		if(num == 1){
+			int date0 = 1;
+			int date1 = 10;
+			int date2 = 20;
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			SimpleDateFormat sdf2=new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+			Calendar calendar=Calendar.getInstance();
+			String currentTime  = sdf.format(calendar.getTime()); //当前时间
+			calendar.set(Calendar.DAY_OF_MONTH, date0);
+			String oneTime = sdf2.format(calendar.getTime()); //本月1号的时间
+			calendar.set(Calendar.DAY_OF_MONTH, date1);
+			String tenTime = sdf2.format(calendar.getTime()); //本月10号的时间
+			calendar.set(Calendar.DAY_OF_MONTH, date2);
+			String twentyTime = sdf2.format(calendar.getTime()); //本月20号的时间
+			calendar.add(Calendar.MONTH, 1);
+			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+			String nextMonth = sdf2.format(calendar.getTime()); //下一个月1号
+
+			if(currentTime.compareTo(tenTime)<0){ //当前时间小于本月10号
+				queryWrapper.between("create_time",oneTime,tenTime);
+			}else if(currentTime.compareTo(twentyTime)>0){ //当前时间大于本月20号
+				queryWrapper.between("create_time",twentyTime,nextMonth);
+			}else{ //当前时间介于本月10号到20号
+				queryWrapper.between("create_time",oneTime,twentyTime);
+			}
+		}
+
+
+
+		//权限设置
 		List<String> companys = auth.queryCompanys();
 		queryWrapper.in("filer_company_name", companys);
 		
@@ -126,12 +137,15 @@ public class ElectricityFilerBController extends JeecgController<ElectricityFile
 	
 	//查询所有数据
 	@RequestMapping(value = "/queryall", method = RequestMethod.GET)
-	public Result<List<ElectricityFilerB>> waterqueryall(String companyName) {
+	public Result<List<ElectricityFilerB>> waterqueryall(String companyName,String begin,String end) {
 		Result<List<ElectricityFilerB>> result = new Result<>();
 		QueryWrapper<ElectricityFilerB> queryWrapper = new QueryWrapper<ElectricityFilerB>();
 		queryWrapper.orderByDesc("create_time");
 		if(!oConvertUtils.isEmpty(companyName)) {
 			queryWrapper.eq("filer_company_name", companyName);
+		}
+		if(!oConvertUtils.isEmpty(begin)&&!oConvertUtils.isEmpty(end)){
+			queryWrapper.between("create_time",begin,end);
 		}
 		List<ElectricityFilerB> list = electricityFilerBService.list(queryWrapper);
 		if(list==null||list.size()<=0) {
@@ -153,58 +167,99 @@ public class ElectricityFilerBController extends JeecgController<ElectricityFile
 	@AutoLog(value = "电量申报-添加")
 	@ApiOperation(value="电量申报-添加", notes="电量申报-添加")
 	@PostMapping(value = "/add")
-	public Result<?> add(@RequestBody ElectricityFilerB electricityFilerB,MomthElec momthElec) {
-		System.out.println("==========");
-		System.out.println(electricityFilerB);
-		electricityFilerBService.save(electricityFilerB);
-//		String companyName = electricityFilerB.getFilerCompanyName();
-//		String market = electricityFilerB.getMarketQuotation();
-//		String month = electricityFilerB.getFilerMonth();
-//		//获取改公司最新的数据
-//		Result<List<MomthElec>> result = new Result<>();
-//		QueryWrapper<MomthElec> queryWrapper = new QueryWrapper<MomthElec>();
-//		queryWrapper.orderByDesc("create_time");
-//		List<MomthElec> list = momthElecService.list(queryWrapper);
-//		for(int i=0;i<list.size();i++) {
-//			if(companyName.equals(list.get(i).getUsername())) {
-//				momthElec = list.get(i);
-//			}
-//			break;
-//		}
-//		momthElec.setId("");
-//		momthElec.setCreateBy("");
-//		momthElec.setCreateTime(null);
-//		momthElec.setUsername(companyName);
-//		momthElec.setStat("2");
-//		if(month.equals("yi")) {
-//			momthElec.setYi(market);
-//		}else if(month.equals("er")) {
-//			momthElec.setEr(market);
-//		}else if(month.equals("san")) {
-//			momthElec.setSan(market);
-//		}else if(month.equals("si")) {
-//			momthElec.setSi(market);
-//		}else if(month.equals("wu")) {
-//			momthElec.setWu(market);
-//		}else if(month.equals("liu")) {
-//			momthElec.setLiu(market);
-//		}else if(month.equals("qi")) {
-//			momthElec.setQi(market);
-//		}else if(month.equals("ba")) {
-//			momthElec.setBa(market);
-//		}else if(month.equals("jiu")) {
-//			momthElec.setJiu(market);
-//		}else if(month.equals("shi")) {
-//			momthElec.setShi(market);
-//		}else if(month.equals("shiyi")) {
-//			momthElec.setShiyi(market);
-//		}else if(month.equals("shier")) {
-//			momthElec.setShier(market);
-//		}
-//		momthElecService.save(momthElec);
+	public Result<?> add(@RequestBody ElectricityFilerB electricityFilerB) {
+
+		//电量申报，按月申报，当在某个时间段内时，若这个时间内无数据则进行添加，否则进行修改
+		Result<List<ElectricityFilerB>> result = null;
+		int date0 = 1;
+		int date1 = 10;
+		int date2 = 20;
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+		SimpleDateFormat sdf2=new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+		Calendar calendar=Calendar.getInstance();
+		String currentTime  = sdf.format(calendar.getTime()); //当前时间
+		calendar.set(Calendar.DAY_OF_MONTH, date0);
+		String oneTime = sdf2.format(calendar.getTime()); //本月1号的时间
+		calendar.set(Calendar.DAY_OF_MONTH, date1);
+		String tenTime = sdf2.format(calendar.getTime()); //本月10号的时间
+		calendar.set(Calendar.DAY_OF_MONTH, date2);
+		String twentyTime = sdf2.format(calendar.getTime()); //本月20号的时间
+		calendar.add(Calendar.MONTH, 1);
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+		String nextMonth = sdf2.format(calendar.getTime()); //下一个月1号
+
+		if(currentTime.compareTo(tenTime)<0){ //当前时间小于本月10号
+			result = this.waterqueryall(electricityFilerB.getFilerCompanyName(),oneTime,tenTime);
+			//电量申报的同时，修改分月电量表数据（申报公司，状态，申报月份，申报量）
+			this.updateMonthElec(electricityFilerB.getFilerCompanyName(),"1",currentTime.split("-")[1],electricityFilerB.getMarketQuotation());
+		}else if(currentTime.compareTo(twentyTime)>0){ //当前时间大于本月20号
+			result = this.waterqueryall(electricityFilerB.getFilerCompanyName(),twentyTime,nextMonth);
+			this.updateMonthElec(electricityFilerB.getFilerCompanyName(),"2",currentTime.split("-")[1],electricityFilerB.getMarketQuotation());
+		}else{ //当前时间介于本月10号到20号
+			result = this.waterqueryall(electricityFilerB.getFilerCompanyName(),tenTime,twentyTime);
+			this.updateMonthElec(electricityFilerB.getFilerCompanyName(),"3",currentTime.split("-")[1],electricityFilerB.getMarketQuotation());
+		}
+		if(result.isSuccess()){
+			electricityFilerB.setId(result.getResult().get(0).getId());
+		}
+		electricityFilerB.setFilerStatus("1");
+		electricityFilerBService.saveOrUpdate(electricityFilerB);
+
 		return Result.ok("添加成功！");
 	}
-	
+
+	 /**
+	  *   添加
+	  *   根据电量申报 修改 分月电量
+	  * @return
+	  */
+	 private void updateMonthElec(String companyName,String num,String month,String marketQuotation){
+//		 Result<List<MomthElec>> result = new Result<>();
+		 QueryWrapper<MomthElec> queryWrapper = new QueryWrapper<MomthElec>();
+		 queryWrapper.orderByDesc("update_num");
+		 if(!oConvertUtils.isEmpty(companyName)) {
+			 queryWrapper.eq("username", companyName);
+		 }
+		 if(!oConvertUtils.isEmpty(num)) {
+			 queryWrapper.eq("update_num", num);
+		 }
+		 List<MomthElec> list = momthElecService.list(queryWrapper);
+		 MomthElec me = null;
+		 if(list==null||list.size()<=0) {
+			 me = new MomthElec();
+			 me.setUsername(companyName);
+		 }else {
+		 	me = list.get(0);
+		 }
+		 me.setUpdateNum(Integer.valueOf(num));
+		 if(month.equals("1")){
+			 me.setYi(marketQuotation);
+		 }else if(month.equals("2")){
+			 me.setEr(marketQuotation);
+		 }else if(month.equals("3")){
+			 me.setSan(marketQuotation);
+		 }else if(month.equals("4")){
+			 me.setSi(marketQuotation);
+		 }else if(month.equals("5")){
+			 me.setWu(marketQuotation);
+		 }else if(month.equals("6")){
+			 me.setLiu(marketQuotation);
+		 }else if(month.equals("7")){
+			 me.setQi(marketQuotation);
+		 }else if(month.equals("8")){
+			 me.setBa(marketQuotation);
+		 }else if(month.equals("9")){
+			 me.setJiu(marketQuotation);
+		 }else if(month.equals("10")){
+			 me.setShi(marketQuotation);
+		 }else if(month.equals("11")){
+			 me.setShiyi(marketQuotation);
+		 }else if(month.equals("12")){
+			 me.setShier(marketQuotation);
+		 }
+		 momthElecService.saveOrUpdate(me);
+	 }
+
 	/**
 	 *   添加
 	 *   售电公司 替用户申报电量
@@ -237,15 +292,13 @@ public class ElectricityFilerBController extends JeecgController<ElectricityFile
 	/**
 	 *  批量修改
 	 *
-	 * @param ids
+	 * @param entityList
 	 * @return
 	 */
 	@AutoLog(value = "电量申报-批量修改")
 	@ApiOperation(value="电量申报-批量修改", notes="电量申报-批量修改")
 	@PutMapping(value = "/updateBatch")
 	public Result<?> updateBatch(@RequestBody List<ElectricityFilerB> entityList) {
-		System.out.println("==============");
-		System.out.println(entityList);
 		this.electricityFilerBService.updateBatchById(entityList);
 		return Result.ok("批量修改成功!");
 	}

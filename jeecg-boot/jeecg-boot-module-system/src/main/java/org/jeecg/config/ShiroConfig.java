@@ -103,6 +103,8 @@ public class ShiroConfig {
 		//zrr 微信小程序注册页面添加公司信息，排除公司的相关方法
 		filterChainDefinitionMap.put("/userinfob/userInfoB/add", "anon");//用户新增
 		filterChainDefinitionMap.put("/userinfob/userInfoB/queryall", "anon");//用户查询
+		filterChainDefinitionMap.put("/sys/user/saveOrUpdate", "anon");//修改状态
+		filterChainDefinitionMap.put("/sys/user/queryall", "anon");//修改状态
 		
 		// update-begin--Author:sunjianlei Date:20190813 for：排除字体格式的后缀
 		filterChainDefinitionMap.put("/**/*.ttf", "anon");

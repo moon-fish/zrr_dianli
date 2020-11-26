@@ -129,6 +129,11 @@ public class SysUser implements Serializable {
     private String post;
 
     /**
+     * 是否同意
+     */
+    private String isAgree;
+
+    /**
      * 座机号
      */
     @Excel(name = "座机号", width = 15)
