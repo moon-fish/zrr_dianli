@@ -31,18 +31,19 @@
             <a-list>
               <a-list-item :key="index" v-for="(record, index) in announcement1">
                 <div style="margin-left: 5%;width: 80%">
-                  <p><a @click="showAnnouncement(record)">{{ record.titile }}</a></p>
+<!--                  <p><a @click="showAnnouncement(record)">{{ record.titile }}</a></p>-->
+                  <p><a @click="showMonthElec(record)">{{ record.titile }}</a></p>
                   <p style="color: rgba(0,0,0,.45);margin-bottom: 0px">{{ record.createTime }} 发布</p>
                 </div>
                 <div style="text-align: right">
-                  <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'L'" color="blue">一般消息</a-tag>
-                  <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'M'" color="orange">重要消息</a-tag>
-                  <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'H'" color="red">紧急消息</a-tag>
+<!--                  <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'L'" color="blue">一般消息</a-tag>-->
+                  <a-tag v-if="record.priority === 'M'" color="orange">重要消息</a-tag>
+<!--                  <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'H'" color="red">紧急消息</a-tag>-->
                 </div>
               </a-list-item>
-              <div style="margin-top: 5px;text-align: center">
-                <a-button @click="toMyAnnouncement()" type="dashed" block>查看更多</a-button>
-              </div>
+<!--              <div style="margin-top: 5px;text-align: center">-->
+<!--                <a-button @click="toMyAnnouncement()" type="dashed" block>查看更多</a-button>-->
+<!--              </div>-->
             </a-list>
           </a-tab-pane>
           <a-tab-pane :tab="msg2Title" key="2">
@@ -50,17 +51,18 @@
               <a-list-item :key="index" v-for="(record, index) in announcement2">
                 <div style="margin-left: 5%;width: 80%">
                   <p><a @click="showAnnouncement(record)">{{ record.titile }}</a></p>
+<!--                  <p><a @click="showDayElec(record)">{{ record.titile }}</a></p>-->
                   <p style="color: rgba(0,0,0,.45);margin-bottom: 0px">{{ record.createTime }} 发布</p>
                 </div>
                 <div style="text-align: right">
                   <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'L'" color="blue">一般消息</a-tag>
-                  <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'M'" color="orange">重要消息</a-tag>
+                  <a-tag v-if="record.priority === 'M'" color="orange">重要消息</a-tag>
                   <a-tag @click="showAnnouncement(record)" v-if="record.priority === 'H'" color="red">紧急消息</a-tag>
                 </div>
               </a-list-item>
-              <div style="margin-top: 5px;text-align: center">
-                <a-button @click="toMyAnnouncement()" type="dashed" block>查看更多</a-button>
-              </div>
+<!--              <div style="margin-top: 5px;text-align: center">-->
+<!--                <a-button @click="toMyAnnouncement()" type="dashed" block>查看更多</a-button>-->
+<!--              </div>-->
             </a-list>
           </a-tab-pane>
         </a-tabs>
@@ -72,6 +74,8 @@
       </a-badge>
     </span>
     <show-announcement ref="ShowAnnouncement" @ok="modalFormOk"></show-announcement>
+    <electricity-filer-b-list-modal ref="electricityFilerBListModal" @ok="modalFormOk"></electricity-filer-b-list-modal>
+    <day-elec-list-modal ref="dayElec" @ok="modalFormOk"></day-elec-list-modal>
     <dynamic-notice ref="showDynamNotice" :path="openPath" :formData="formData"/>
   </a-popover>
 </template>
@@ -82,12 +86,17 @@
   import store from '@/store/'
   import DynamicNotice from './DynamicNotice'
 
+  import DayElecListModal from "../../views/dw/modules/DayElecListModal";
+  import ElectricityFilerBListModal from "../../views/dw/modules/ElectricityFilerBListModal";
+
 
   export default {
     name: "HeaderNotice",
     components: {
       DynamicNotice,
       ShowAnnouncement,
+      DayElecListModal,
+      ElectricityFilerBListModal,
     },
     data () {
       return {
@@ -144,12 +153,13 @@
           // 获取系统消息
           getAction(this.url.listCementByUser).then((res) => {
             if (res.success) {
+              console.log(res)
               this.announcement1 = res.result.anntMsgList;
               this.msg1Count = res.result.anntMsgTotal;
-              this.msg1Title = "通知(" + res.result.anntMsgTotal + ")";
+              this.msg1Title = "月申报(" + res.result.anntMsgTotal + ")";
               this.announcement2 = res.result.sysMsgList;
               this.msg2Count = res.result.sysMsgTotal;
-              this.msg2Title = "系统消息(" + res.result.sysMsgTotal + ")";
+              this.msg2Title = "日申报(" + res.result.sysMsgTotal + ")";
             }
           }).catch(error => {
             console.log("系统消息通知异常",error);//这行打印permissionName is undefined
@@ -172,6 +182,7 @@
         }, 200)
       },
       showAnnouncement(record){
+        console.log("------------------sssssss")
         putAction(this.url.editCementSend,{anntId:record.id}).then((res)=>{
           if(res.success){
             this.loadData();
@@ -185,6 +196,20 @@
         }else{
           this.$refs.ShowAnnouncement.detail(record);
         }
+      },
+      //显示月电量申报情况
+      showMonthElec(record){
+        console.log("------------------sssssss")
+        putAction(this.url.editCementSend,{anntId:record.id}).then((res)=>{
+          if(res.success){
+            this.loadData();
+          }
+        });
+        this.$refs.electricityFilerBListModal.detail(record);
+      },
+      //显示日电量申报情况
+      showDayElec(record){
+        this.$refs.dayElec.detail(record);
       },
       toMyAnnouncement(){
 

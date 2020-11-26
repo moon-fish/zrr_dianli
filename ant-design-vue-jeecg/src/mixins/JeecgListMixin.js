@@ -47,7 +47,7 @@ export const JeecgListMixin = {
       /* 高级查询条件生效状态 */
       superQueryFlag:false,
       /* 高级查询条件 */
-      superQueryParams:""
+      superQueryParams:"",
     }
   },
   created() {

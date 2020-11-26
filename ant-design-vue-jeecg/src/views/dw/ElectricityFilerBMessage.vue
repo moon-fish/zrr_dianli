@@ -1,50 +1,33 @@
 <template>
   <a-card :bordered="false">
     <!-- 查询区域 -->
-    <div class="table-page-search-wrapper">
-      <a-form layout="inline" @keyup.enter.native="searchQuery">
-        <a-row :gutter="24">
-          <a-col :xl="6" :lg="7" :md="8" :sm="24">
-            <a-form-item label="申报企业名称">
-              <a-input placeholder="请输入申报企业名称" v-model="queryParam.filerCompanyName"></a-input>
-            </a-form-item>
-          </a-col>
+<!--    <div class="table-page-search-wrapper">-->
+<!--      <a-form layout="inline" @keyup.enter.native="searchQuery">-->
+<!--        <a-row :gutter="24">-->
+<!--          <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
+<!--            <a-form-item label="申报企业名称">-->
+<!--              <a-input placeholder="请输入申报企业名称" v-model="queryParam.filerCompanyName"></a-input>-->
+<!--            </a-form-item>-->
+<!--          </a-col>-->
 <!--          <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
 <!--            <a-form-item label="负荷预测">-->
 <!--              <a-input placeholder="请输入负荷预测" v-model="queryParam.loadForecasting"></a-input>-->
 <!--            </a-form-item>-->
 <!--          </a-col>-->
-          <a-col :xl="6" :lg="7" :md="8" :sm="24">
-            <a-form-item label="申报状态">
-              <a-input placeholder="申报状态" v-model="queryParam.filerResult"></a-input>
-<!--              <j-dict-select-tag placeholder="-请选择-" v-model="queryParam.filerStatus" dictCode="elecFilterStatus,1,"/>-->
-            </a-form-item>
-          </a-col>
-          <template v-if="toggleSearchStatus">
-            <!--<a-col :xl="6" :lg="7" :md="8" :sm="24">-->
-              <!--<a-form-item label="交易类型">-->
-                <!--<a-input placeholder="请输入交易类型" v-model="queryParam.transactionType"></a-input>-->
-              <!--</a-form-item>-->
-            <!--</a-col>-->
+<!--          <template v-if="toggleSearchStatus">-->
+<!--            &lt;!&ndash;<a-col :xl="6" :lg="7" :md="8" :sm="24">&ndash;&gt;-->
+<!--              &lt;!&ndash;<a-form-item label="交易类型">&ndash;&gt;-->
+<!--                &lt;!&ndash;<a-input placeholder="请输入交易类型" v-model="queryParam.transactionType"></a-input>&ndash;&gt;-->
+<!--              &lt;!&ndash;</a-form-item>&ndash;&gt;-->
+<!--            &lt;!&ndash;</a-col>&ndash;&gt;-->
 <!--            <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
 <!--              <a-form-item label="市场报价">-->
 <!--                <a-input placeholder="请输入市场报价" v-model="queryParam.marketQuotation"></a-input>-->
 <!--              </a-form-item>-->
 <!--            </a-col>-->
-            <a-col :xl="12" :lg="12" :md="12" :sm="24">
-              <a-form-item label="申报时间">
-                <j-date placeholder="请选择开始日期" class="query-group-cust" v-model="queryParam.createTime_begin"></j-date>
-                <span class="query-group-split-cust"></span>
-                <j-date placeholder="请选择结束日期" class="query-group-cust" v-model="queryParam.createTime_end"></j-date>
-              </a-form-item>
-            </a-col>
-
-
-
 <!--            <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
 <!--              <a-form-item label="申报开始时间">-->
-<!--&lt;!&ndash;                <a-input placeholder="请输入申报开始时间" v-model="queryParam.beginDate"></a-input>&ndash;&gt;-->
-<!--                <a-date-picker @change="onChange" />-->
+<!--                <a-input placeholder="请输入申报开始时间" v-model="queryParam.beginDate"></a-input>-->
 <!--              </a-form-item>-->
 <!--            </a-col>-->
 <!--            <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
@@ -62,47 +45,51 @@
 <!--                <a-input placeholder="申报人所属公司" v-model="queryParam.filerCompany"></a-input>-->
 <!--              </a-form-item>-->
 <!--            </a-col>-->
+<!--            <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
+<!--              <a-form-item label="申报结果">-->
+<!--                <a-input placeholder="申报结果" v-model="queryParam.filerResult"></a-input>-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--          </template>-->
+<!--          <a-col :xl="6" :lg="7" :md="8" :sm="24">-->
+<!--            <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">-->
+<!--              <a @click="handleToggleSearch" style="margin-left: 8px;margin-right: 20px;">-->
+<!--                {{ toggleSearchStatus ? '收起' : '展开' }}-->
+<!--                <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>-->
+<!--              </a>-->
+<!--              <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>-->
+<!--              <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>-->
 
-          </template>
-          <a-col :xl="6" :lg="7" :md="8" :sm="24">
-            <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
-              <a @click="handleToggleSearch" style="margin-left: 8px;margin-right: 20px;">
-                {{ toggleSearchStatus ? '收起' : '展开' }}
-                <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
-              </a>
-              <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
-              <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
-
-            </span>
-          </a-col>
-        </a-row>
-      </a-form>
-    </div>
+<!--            </span>-->
+<!--          </a-col>-->
+<!--        </a-row>-->
+<!--      </a-form>-->
+<!--    </div>-->
     <!-- 查询区域-END -->
     
     <!-- 操作按钮区域 -->
-    <div class="table-operator">
-      <a-button @click="handleAdd" type="primary" icon="plus">新增</a-button>
-      <a-button type="primary" icon="download" @click="handleExportXls('电量申报')">导出</a-button>
-      <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
-        <a-button type="primary" icon="import">导入</a-button>
-      </a-upload>
-      <a-dropdown v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay">
-          <a-menu-item key="1" @click="batchDel"><a-icon type="delete"/>删除</a-menu-item>
-          <a-menu-item key="2" @click="batchAccess"><a-icon type="check"/>通过</a-menu-item>
-          <a-menu-item key="3" @click="batchBack"><a-icon type="close"/>反驳</a-menu-item>
-        </a-menu>
-        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /></a-button>
-      </a-dropdown>
-    </div>
+<!--    <div class="table-operator">-->
+<!--      <a-button @click="handleAdd" type="primary" icon="plus">新增</a-button>-->
+<!--      <a-button type="primary" icon="download" @click="handleExportXls('电量申报')">导出</a-button>-->
+<!--      <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">-->
+<!--        <a-button type="primary" icon="import">导入</a-button>-->
+<!--      </a-upload>-->
+<!--      <a-dropdown v-if="selectedRowKeys.length > 0">-->
+<!--        <a-menu slot="overlay">-->
+<!--          <a-menu-item key="1" @click="batchDel"><a-icon type="delete"/>删除</a-menu-item>-->
+<!--          <a-menu-item key="2" @click="batchAccess"><a-icon type="check"/>通过</a-menu-item>-->
+<!--          <a-menu-item key="3" @click="batchBack"><a-icon type="close"/>反驳</a-menu-item>-->
+<!--        </a-menu>-->
+<!--        <a-button style="margin-left: 8px"> 批量操作 <a-icon type="down" /></a-button>-->
+<!--      </a-dropdown>-->
+<!--    </div>-->
 
     <!-- table区域-begin -->
     <div>
-      <div class="ant-alert ant-alert-info" style="margin-bottom: 16px;">
-        <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项
-        <a style="margin-left: 24px" @click="onClearSelected">清空</a>
-      </div>
+<!--      <div class="ant-alert ant-alert-info" style="margin-bottom: 16px;">-->
+<!--        <i class="anticon anticon-info-circle ant-alert-icon"></i> 已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a>项-->
+<!--        <a style="margin-left: 24px" @click="onClearSelected">清空</a>-->
+<!--      </div>-->
 
       <a-table
         ref="table"
@@ -185,15 +172,13 @@
   import ElectricityFilerBModal from './modules/ElectricityFilerBModal'
   import ElecFilerDetailModal from './modules/ElecFilerDetailModal'
   import { putAction } from '@/api/manage'
-  import JDate from '@/components/jeecg/JDate.vue'
 
   export default {
     name: "ElectricityFilerBList",
     mixins:[JeecgListMixin],
     components: {
       ElectricityFilerBModal,
-      ElecFilerDetailModal,
-      JDate
+      ElecFilerDetailModal
     },
     data () {
       return {
@@ -285,7 +270,7 @@
           }
         ],
         url: {
-          list: "/electricityfilerb/electricityFilerB/list/2",
+          list: "/electricityfilerb/electricityFilerB/list/1",
           delete: "/electricityfilerb/electricityFilerB/delete",
           deleteBatch: "/electricityfilerb/electricityFilerB/deleteBatch",
           exportXlsUrl: "/electricityfilerb/electricityFilerB/exportXls",
@@ -306,11 +291,6 @@
       //   console.log("dsad")
       //   this.$refs.modalDetail.setData();
       // }
-      onChange(date, dateString) {
-        console.log(date, dateString);
-        let params = this.getQueryParams();//查询条件
-        params.beginDate = dateString
-      },
       batchAccess(){
         //console.log(this.selectionRows)
         if (this.selectedRowKeys.length <= 0) {
